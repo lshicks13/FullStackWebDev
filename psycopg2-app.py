@@ -28,7 +28,8 @@ cur.execute("""
   );
 """)
 
-cursor.execute('INSERT INTO table2 (id, completed) VALUES (%s, %s);', (1, True))
+cursor.execute('INSERT INTO table2 (id, completed) \
+  VALUES (%s, %s);', (1, True))
 
 SQL = 'INSERT INTO table2 (id, completed) VALUES (%(id)s, %(completed)s);'
 
