@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
-import sysconfig
+import sys
 from flask_migrate import Migrate
 
 app = Flask(__name__)
@@ -29,6 +29,25 @@ class Todo(db.Model):
 
     def __repr__(self):
         return f'<Todo {self.id} {self.description}>'
+
+
+@app.route('/todos/<todo_id>/delete', methods=['DELETE'])
+def delete_todo(todo_id):
+    error = False
+    try:
+        todo = Todo.query.get(todo_id)
+        db.session.delete(todo)
+        db.session.commit()
+    except Exception:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+    if error:
+        abort(400)
+    else:
+        return jsonify({'success': True})
 
 
 @app.route('/todos/<todo_id>/set-completed', methods=['POST'])
