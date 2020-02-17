@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, \
+    jsonify, Response, abort
 from flask_sqlalchemy import SQLAlchemy
 import sys
 from flask_migrate import Migrate
+from livereload import Server
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
@@ -31,7 +33,7 @@ class Todo(db.Model):
         return f'<Todo {self.id} {self.description}>'
 
 
-@app.route('/todos/<todo_id>/delete', methods=['DELETE'])
+@app.route('/todos/<todo_id>/delete', methods=['DELETE', 'GET'])
 def delete_todo(todo_id):
     error = False
     try:
@@ -47,7 +49,13 @@ def delete_todo(todo_id):
     if error:
         abort(400)
     else:
-        return jsonify({'success': True})
+        # response = Response(status=303)
+        # response.location = '/'
+        # print(response)
+        # return response
+        return jsonify({
+            'success': True
+        })
 
 
 @app.route('/todos/<todo_id>/set-completed', methods=['POST'])
@@ -95,3 +103,7 @@ def create_todo():
 @app.route('/')
 def index():
     return render_template('index.html', data=Todo.query.order_by('id').all())
+
+
+if __name__ == '__main__':
+    app.run()
