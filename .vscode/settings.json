@@ -4,5 +4,6 @@
     "python.linting.pycodestyleEnabled": true,
     "python.linting.pydocstyleEnabled": false,
     "python.linting.flake8Enabled": false,
-    "python.linting.mypyEnabled": false
+    "python.linting.mypyEnabled": false,
+    "python.pythonPath": "/usr/local/bin/python3"
 }
