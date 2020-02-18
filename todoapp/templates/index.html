@@ -11,7 +11,7 @@
             list-style: none;
             padding: 0;
             margin: 0;
-            width: 200px;
+            width: 300px;
         }
         li {
             clear:both;
@@ -29,9 +29,18 @@
 </head>
 
 <body>
+    <form id="form1">
+        <div>
+            <label for="todo-lists">ToDo Lists</label>
+            <input type="text" id="todo-lists" name="todo-lists" />
+        </div>
+        <div>
+            <input type="submit" id="submit" value="Create" />
+        </div>
+    </form>
     <form id="form">
         <div>
-            <label for="description">Description</label>
+            <label for="description">Todo Description</label>
             <input type="text" id="description" name="description" />
         </div>
         <div>
@@ -39,6 +48,86 @@
         </div>
     </form>
     <div id="error" class='hidden'>Something went wrong!</div>
+    <div>
+        <ul id="todolists">
+            {% for l in lists %}
+            <li>
+                <input class="check-completed" list-id="{{l.id}}" type="checkbox" {% if l.completed %} checked
+                    {% endif %} /> 
+                    {{ l.name }}
+                <button class="todolist-deleted" data-id="{{l.id}}" type="button" >&cross;</button>
+            </li>
+            {% endfor %}
+        </ul>
+        <script>
+            // const buttons = document.querySelectorAll('.todolist-deleted');
+            // for (let i = 0; i < buttons.length; i++) {
+            //     const button = buttons[i];
+            //     button.onclick = function(e) {
+            //         console.log('event', e);
+            //         const todolistId = e.target.dataset['id']
+            //         fetch('/todolist/' + todolistId + '/delete', {
+            //             method: 'DELETE'
+            //         })
+            //             .then(function (jsonResponse) {
+            //                 document.getElementById('error').className = 'hidden';
+            //             })
+            //             .catch(function () {
+            //                 document.getElementById('error').className = '';
+            //             })
+            //     }
+            // }
+            const lcheckboxes = document.querySelectorAll('.check-completed');
+            for (let i = 0; i < checkboxes.length; i++) {
+                const lcheckbox = checkboxes[i];
+                lcheckbox.onchange = function(e) {
+                    console.log('event', e);
+                    const newCompleted = e.target.checked;
+                    const todolistId = e.target.dataset['id']
+                    fetch('/todolists/' + todolistId + '/set-completed', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            'completed': newCompleted
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(function (jsonResponse) {
+                            document.getElementById('error').className = 'hidden';
+                        })
+                        .catch(function () {
+                            document.getElementById('error').className = '';
+                        })
+                }
+            }
+            document.getElementById('form1').onsubmit = function(e) {
+                e.preventDefault();
+                fetch('/todolists/create', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        'name': document.getElementById('todo-lists').value
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(function (response) {
+                        return response.json();
+                    })
+                    .then(function (jsonResponse) {
+                        console.log(jsonResponse);
+                        const liItem = document.createElement('LI');
+                        liItem.innerHTML = jsonResponse['name'];
+                        document.getElementById('todolists').appendChild(liItem);
+                        document.getElementById('error').className = 'hidden';
+                    })
+                    .catch(function () {
+                        document.getElementById('error').className = '';
+                    })
+            }
+        </script>
+    </div>
     <div>
         <ul id="todos">
             {% for d in data %}
