@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, \
+from flask import Flask, render_template, \
+    request, redirect, url_for, \
     jsonify, Response, abort
 from flask_sqlalchemy import SQLAlchemy
-import sys
 from flask_migrate import Migrate
-from livereload import Server
+import sys
+
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
@@ -41,11 +42,8 @@ class TodoList(db.Model):
     name = db.Column(db.String(), nullable=False)
     todos = db.relationship('Todo', backref='list', lazy=True)
 
-    def __repr__(self):
-        return f'<TodoList {self.id} {self.name}>'
 
-
-@app.route('/todos/<todo_id>/delete', methods=['DELETE', 'GET'])
+@app.route('/todos/<todo_id>/delete', methods=['DELETE'])
 def delete_todo(todo_id):
     error = False
     try:
@@ -61,10 +59,6 @@ def delete_todo(todo_id):
     if error:
         abort(400)
     else:
-        # response = Response(status=303)
-        # response.location = '/'
-        # print(response)
-        # return response
         return jsonify({
             'success': True
         })
@@ -85,7 +79,7 @@ def set_completed_todolist(todolist_id):
     finally:
         db.session.close()
     if error:
-        abort(400)
+        abort(500)
     else:
         return redirect(url_for('index'))
 
@@ -105,7 +99,7 @@ def set_completed_todo(todo_id):
     finally:
         db.session.close()
     if error:
-        abort(400)
+        abort(500)
     else:
         return redirect(url_for('index'))
 
@@ -138,7 +132,10 @@ def create_todo():
     body = {}
     try:
         description = request.get_json()['description']
+        list_id = request.get_json()['list_id']
         todo = Todo(description=description)
+        active_list = TodoList.query.get(list_id)
+        todo.list = active_list
         db.session.add(todo)
         db.session.commit()
         body['description'] = todo.description
@@ -149,21 +146,24 @@ def create_todo():
     finally:
         db.session.close()
     if error:
-        abort(400)
+        abort(500)
     else:
         return jsonify(body)
 
 
-@app.route('/todolists')
-def get_lists():
-    return render_template('index.html',
-                           data=TodoList.query.order_by('id').all())
+# @app.route('/todolists')
+# def get_lists():
+#     return redirect(url_for('index'))
 
 
 @app.route('/lists/<list_id>')
 def get_list_todos(list_id):
-    return render_template('index.html', data=Todo.query.filter_by
-                           (list_id=list_id).order_by('id').all())
+    return render_template('index.html',
+                           lists=TodoList.query.all(),
+                           active_list=TodoList.query.get(list_id),
+                           todos=Todo.query.filter_by(list_id=list_id)
+                           .order_by('id').all()
+                           )
 
 
 @app.route('/')

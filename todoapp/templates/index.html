@@ -38,24 +38,15 @@
             <input type="submit" id="submit" value="Create" />
         </div>
     </form>
-    <form id="form">
-        <div>
-            <label for="description">Todo Description</label>
-            <input type="text" id="description" name="description" />
-        </div>
-        <div>
-            <input type="submit" id="submit" value="Create" />
-        </div>
-    </form>
     <div id="error" class='hidden'>Something went wrong!</div>
     <div>
         <ul id="todolists">
-            {% for l in lists %}
+            {% for d in data %}
             <li>
-                <input class="check-completed" list-id="{{l.id}}" type="checkbox" {% if l.completed %} checked
+                <input class="listcheck-completed" data-id="{{d.id}}" type="checkbox" {% if d.completed %} checked
                     {% endif %} /> 
-                    {{ l.name }}
-                <button class="todolist-deleted" data-id="{{l.id}}" type="button" >&cross;</button>
+                    {{ d.name }}
+                <button class="todolist-deleted" data-id="{{d.id}}" type="button" >&cross;</button>
             </li>
             {% endfor %}
         </ul>
@@ -66,7 +57,7 @@
             //     button.onclick = function(e) {
             //         console.log('event', e);
             //         const todolistId = e.target.dataset['id']
-            //         fetch('/todolist/' + todolistId + '/delete', {
+            //         fetch('/todolists/' + todolistId + '/delete', {
             //             method: 'DELETE'
             //         })
             //             .then(function (jsonResponse) {
@@ -77,9 +68,9 @@
             //             })
             //     }
             // }
-            const lcheckboxes = document.querySelectorAll('.check-completed');
-            for (let i = 0; i < checkboxes.length; i++) {
-                const lcheckbox = checkboxes[i];
+            const lcheckboxes = document.querySelectorAll('.listcheck-completed');
+            for (let i = 0; i < lcheckboxes.length; i++) {
+                const lcheckbox = lcheckboxes[i];
                 lcheckbox.onchange = function(e) {
                     console.log('event', e);
                     const newCompleted = e.target.checked;
@@ -128,6 +119,15 @@
             }
         </script>
     </div>
+    <form id="form">
+        <div>
+            <label for="description">Todo Description</label>
+            <input type="text" id="description" name="description" />
+        </div>
+        <div>
+            <input type="submit" id="submit" value="Create" />
+        </div>
+    </form>
     <div>
         <ul id="todos">
             {% for d in data %}
